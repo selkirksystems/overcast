@@ -19,10 +19,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
+
+import com.spotify.docker.client.messages.ContainerInfo;
+import com.xebialabs.overcast.support.docker.DockerDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.xebialabs.overcast.support.docker.DockerDriver;
 
 public class DockerHost implements CloudHost {
 
@@ -37,6 +38,9 @@ public class DockerHost implements CloudHost {
     private boolean removeVolume;
     private List<String> env;
     private Set<String> exposedPorts;
+	private List<String> links;
+	private String containerHostname;
+	private ContainerInfo info;
 
     public DockerHost(String image, String dockerHostName) {
         try {
@@ -51,7 +55,7 @@ public class DockerHost implements CloudHost {
 
     @Override
     public void setup() {
-        dockerDriver.runContainer();
+        info = dockerDriver.runContainer();
     }
 
     @Override
@@ -137,6 +141,26 @@ public class DockerHost implements CloudHost {
         this.exposedPorts = exposedPorts;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(DockerHost.class);
+	public List<String> getLinks() {
+		return links;
+	}
+
+	public void setLinks(List<String> links) {
+		this.links = links;
+	}
+
+	public String getContainerHostname() {
+		return containerHostname;
+	}
+
+	public void setContainerHostname(String containerHostname) {
+		this.containerHostname = containerHostname;
+	}
+
+	public ContainerInfo getInfo() {
+		return info;
+	}
+
+	private static final Logger logger = LoggerFactory.getLogger(DockerHost.class);
 
 }

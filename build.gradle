@@ -10,7 +10,7 @@ buildscript {
     }
 }
 
-version = '2.6.0'
+version = '2.6.0.SELKIRK_2'
 //version = '2.5.1' // Last released version
 
 group = 'com.xebialabs.cloud'

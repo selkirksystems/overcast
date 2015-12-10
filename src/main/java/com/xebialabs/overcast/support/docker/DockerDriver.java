@@ -17,15 +17,18 @@ package com.xebialabs.overcast.support.docker;
 
 import java.util.ArrayList;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerException;
 import com.spotify.docker.client.ImageNotFoundException;
-import com.spotify.docker.client.messages.*;
-
+import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.ContainerInfo;
+import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.PortBinding;
 import com.xebialabs.overcast.host.DockerHost;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DockerDriver {
 
@@ -52,11 +55,14 @@ public class DockerDriver {
         if(dockerHost.getExposedPorts() != null) {
             configBuilder.exposedPorts(dockerHost.getExposedPorts());
         }
+		if(dockerHost.getContainerHostname() != null){
+			configBuilder.hostname(dockerHost.getContainerHostname());
+		}
 
         config = configBuilder.build();
     }
 
-    public void runContainer() {
+    public ContainerInfo runContainer() {
         buildImageConfig();
 
         try {
@@ -67,20 +73,27 @@ public class DockerDriver {
                 createImage();
             }
 
-            if(dockerHost.isExposeAllPorts()) {
-                HostConfig hostConfig = HostConfig.builder().publishAllPorts(true).build();
-                dockerClient.startContainer(containerId, hostConfig);
-            } else {
-                dockerClient.startContainer(containerId);
+			HostConfig.Builder hostConfigBuilder = HostConfig.builder();
+
+			if(dockerHost.isExposeAllPorts()) {
+				hostConfigBuilder.publishAllPorts(true);
             }
+
+			if(dockerHost.getLinks() != null) {
+				hostConfigBuilder.links(dockerHost.getLinks());
+			}
+
+			dockerClient.startContainer(containerId, hostConfigBuilder.build());
 
             final ContainerInfo info = dockerClient.inspectContainer(containerId);
             portMappings = info.networkSettings().ports();
+			return info;
 
         } catch (Exception e) {
             logger.error("Error while setting up docker host: ", e);
         }
 
+		return null;
     }
 
     private void createImage() throws DockerException, InterruptedException {

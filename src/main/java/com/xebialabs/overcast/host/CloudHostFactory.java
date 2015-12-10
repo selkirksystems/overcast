@@ -147,6 +147,8 @@ public class CloudHostFactory {
         dockerHost.setRemoveVolume(getOvercastBooleanProperty(label + Config.DOCKER_REMOVE_VOLUME_SUFFIX));
         dockerHost.setEnv(getOvercastListProperty(label + Config.DOCKER_ENV_SUFFIX));
         dockerHost.setExposedPorts(newHashSet(getOvercastListProperty(label + Config.DOCKER_EXPOSED_PORTS_SUFFIX)));
+        dockerHost.setLinks(getOvercastListProperty(label + Config.DOCKER_LINKS_SUFFIX));
+        dockerHost.setContainerHostname(getOvercastProperty(label + Config.DOCKER_CONTAINER_HOSTNAME_SUFFIX));
 
         return dockerHost;
     }
